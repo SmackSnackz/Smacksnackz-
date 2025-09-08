@@ -65,9 +65,7 @@ const Home = () => {
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-teal-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">T</span>
-          </div>
+          <img src="/assets/logo.png" alt="Throne Companions" className="w-10 h-10 rounded-lg" />
           <span className="text-xl font-bold">Throne Companions</span>
         </div>
         <StatusBadge />
