@@ -152,9 +152,7 @@ const Home = () => {
       <footer className="px-6 py-8 border-t border-gray-700">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-3 mb-4 md:mb-0">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-teal-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
-            </div>
+            <img src="/assets/logo.png" alt="Throne Companions" className="w-8 h-8 rounded-lg" />
             <span className="font-semibold">Throne Companions</span>
           </div>
           <div className="text-gray-400">
