@@ -62,6 +62,24 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+@api_router.get("/companions", response_model=List[Companion])
+async def get_companions():
+    companions = await db.companions.find().to_list(1000)
+    result = []
+    for companion in companions:
+        companion.pop('_id', None)  # Remove MongoDB _id field
+        result.append(Companion(**companion))
+    return result
+
+@api_router.get("/companions/{slug}", response_model=Companion)
+async def get_companion_by_slug(slug: str):
+    companion = await db.companions.find_one({"slug": slug})
+    if not companion:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Companion not found")
+    companion.pop('_id', None)  # Remove MongoDB _id field
+    return Companion(**companion)
+
 # Include the router in the main app
 app.include_router(api_router)
 
