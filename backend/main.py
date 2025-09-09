@@ -7,9 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from bson import ObjectId
+import openai
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/throne_companions")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "CHANGE_ME")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+if OPENAI_API_KEY:
+    openai.api_key = OPENAI_API_KEY
 
 client = MongoClient(MONGO_URI)
 db = client.get_database()
