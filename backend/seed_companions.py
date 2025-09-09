@@ -18,7 +18,7 @@ seed = [
         "short_bio": "Warm, poetic insight with gentle wisdom.",
         "long_backstory": "Sophia guides hearts with clarity and tenderness, a steady light for careful decisions.",
         "traits": ["empathetic", "poetic", "wise"],
-        "avatar_path": "/public/avatars/sophia.png",
+        "avatar_path": "/avatars/sophia.png",
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     },
