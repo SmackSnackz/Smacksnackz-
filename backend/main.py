@@ -112,18 +112,42 @@ def delete_companion(companion_id: str, _: None = Depends(admin_guard)):
     return {"ok": True}
 
 # -------- Chat --------
-def persona_reply(comp: dict, text: str) -> str:
-    traits = ", ".join(comp.get("traits", []))
-    bio = comp.get("short_bio", "")
-    last = text.strip()
-    return f"{comp['name']}: {bio} ({traits})\n→ {last}\nAsk me anything; I'm here."
+def generate_reply(comp: dict, thread: list) -> str:
+    # If no key is set, fallback
+    if not OPENAI_API_KEY:
+        return f"{comp['name']}: I'm here, but my deeper voice isn't unlocked yet. Ask me anything."
+
+    system_prompt = f"You are {comp['name']}, a companion with traits {', '.join(comp.get('traits', []))}. \
+Your style: {comp.get('short_bio','')}. Backstory: {comp.get('long_backstory','')}. \
+Stay loyal to King Sol. Speak in natural conversation, not generic."
+
+    history = []
+    for msg in thread:
+        role = "assistant" if msg["role"] == "assistant" else "user"
+        history.append({"role": role, "content": msg["content"]})
+
+    messages = [{"role": "system", "content": system_prompt}] + history
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=200,
+            temperature=0.9,
+        )
+        return response.choices[0].message["content"]
+    except Exception as e:
+        print(f"OpenAI API error: {e}")
+        return f"{comp['name']}: I'm having trouble finding the right words right now. Try again?"
 
 @app.post("/api/chat")
 def post_chat(body: ChatIn):
     comp = companions.find_one({"_id": oid(body.companion_id)})
     if not comp:
         raise HTTPException(status_code=404, detail="companion_not_found")
+
     now = datetime.utcnow()
+
     # store user msg
     messages.insert_one({
         "companion_id": comp["_id"],
@@ -132,8 +156,19 @@ def post_chat(body: ChatIn):
         "content": body.message,
         "created_at": now
     })
-    # reply
-    reply_text = persona_reply(comp, body.message)
+
+    # fetch last 20 messages for context
+    thread = list(messages.find(
+        {"companion_id": comp["_id"], "session_id": body.session_id}
+    ).sort("created_at", ASCENDING).limit(20))
+    for m in thread:
+        m["_id"] = str(m["_id"])
+        m["companion_id"] = str(m["companion_id"])
+
+    # generate reply
+    reply_text = generate_reply(comp, thread)
+
+    # store reply
     messages.insert_one({
         "companion_id": comp["_id"],
         "session_id": body.session_id,
@@ -141,11 +176,7 @@ def post_chat(body: ChatIn):
         "content": reply_text,
         "created_at": datetime.utcnow()
     })
-    # return recent thread
-    thread = list(messages.find(
-        {"companion_id": comp["_id"], "session_id": body.session_id}
-    ).sort("created_at", ASCENDING).limit(50))
-    for m in thread:
-        m["_id"] = str(m["_id"])
-        m["companion_id"] = str(m["companion_id"])
-    return {"reply": reply_text, "thread": thread}
+
+    return {"reply": reply_text, "thread": thread + [{
+        "role": "assistant", "content": reply_text
+    }]}
