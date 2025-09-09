@@ -35,6 +35,16 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class Companion(BaseModel):
+    name: str
+    slug: str
+    short_bio: str
+    long_backstory: str
+    traits: List[str]
+    avatar_path: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
