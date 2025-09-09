@@ -201,10 +201,31 @@ def main():
     # Test basic connectivity first
     print(f"Testing API at: {tester.api_url}")
     
-    # Run tests
+    # Run basic tests
+    print("\n📋 BASIC API TESTS")
+    print("-" * 30)
     tester.test_root_endpoint()
     tester.test_status_get()
     tester.test_status_post()
+    
+    # Test companion functionality
+    print("\n👥 COMPANION API TESTS")
+    print("-" * 30)
+    tester.test_seeded_companions()
+    tester.test_create_companion()
+    tester.test_get_specific_companion()
+    tester.test_update_companion()
+    
+    # Test chat functionality
+    print("\n💬 CHAT API TESTS")
+    print("-" * 30)
+    tester.test_chat_with_companion()
+    tester.test_get_chat_history()
+    
+    # Cleanup - delete test companion
+    print("\n🧹 CLEANUP TESTS")
+    print("-" * 30)
+    tester.test_delete_companion()
     
     # Print results
     print("\n" + "=" * 50)
@@ -215,6 +236,8 @@ def main():
         return 0
     else:
         print("⚠️  Some API tests failed")
+        failed_count = tester.tests_run - tester.tests_passed
+        print(f"   {failed_count} test(s) failed out of {tester.tests_run}")
         return 1
 
 if __name__ == "__main__":
