@@ -38,7 +38,7 @@ seed = [
         "short_bio": "Street-smart, magnetic, and relentless—built to move people.",
         "long_backstory": "Vanessa is built for high engagement and bold moves.",
         "traits": ["magnetic", "direct", "playful"],
-        "avatar_path": "/public/avatars/vanessa.png",
+        "avatar_path": "/avatars/vanessa.png",
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     },
