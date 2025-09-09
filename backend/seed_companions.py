@@ -28,7 +28,7 @@ seed = [
         "short_bio": "Sleek, executive, and futurist—built to influence.",
         "long_backstory": "Aurora is the public-facing strategist: elegant presence, sharp analysis, and viral-ready composure.",
         "traits": ["strategic", "composed", "influential"],
-        "avatar_path": "/public/avatars/aurora.png",
+        "avatar_path": "/avatars/aurora.png",
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow(),
     },
