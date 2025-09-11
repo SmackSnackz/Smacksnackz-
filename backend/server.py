@@ -62,6 +62,11 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+@api_router.get("/companions", response_model=List[Companion])
+async def get_companions():
+    companions = await db.companions.find().to_list(1000)
+    return [Companion(**companion) foreach companion in companions]
+
 # Include the router in the main app
 app.include_router(api_router)
 
