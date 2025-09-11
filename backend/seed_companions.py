@@ -1,10 +1,16 @@
 import os
 from datetime import datetime
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from dotenv import load_dotenv
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/throne_companions")
-client = MongoClient(MONGO_URI)
-db = client.get_database()
+# Load environment variables
+load_dotenv()
+
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://127.0.0.1:27017")
+DB_NAME = os.getenv("DB_NAME", "test_database")
+
+client = MongoClient(MONGO_URL)
+db = client[DB_NAME]
 companions = db["companions"]
 
 # Indexes
