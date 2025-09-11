@@ -35,6 +35,41 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class Companion(BaseModel):
+    name: str
+    slug: str
+    short_bio: str
+    long_backstory: str
+    traits: List[str]
+    avatar_path: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CompanionCreate(BaseModel):
+    name: str
+    slug: str
+    short_bio: str
+    long_backstory: str
+    traits: List[str]
+    avatar_path: str
+
+class CompanionUpdate(BaseModel):
+    name: Optional[str] = None
+    short_bio: Optional[str] = None
+    long_backstory: Optional[str] = None
+    traits: Optional[List[str]] = None
+    avatar_path: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    companion_slug: str
+    user_message: str
+    companion_response: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class ChatRequest(BaseModel):
+    message: str
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
