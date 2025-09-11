@@ -87,6 +87,82 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
+# Companions endpoints
+@api_router.get("/companions", response_model=List[Companion])
+async def get_companions():
+    companions = await db.companions.find().to_list(1000)
+    return [Companion(**companion) for companion in companions]
+
+@api_router.get("/companions/{slug}", response_model=Companion)
+async def get_companion(slug: str):
+    companion = await db.companions.find_one({"slug": slug})
+    if not companion:
+        raise HTTPException(status_code=404, detail="Companion not found")
+    return Companion(**companion)
+
+@api_router.post("/companions", response_model=Companion)
+async def create_companion(companion_data: CompanionCreate):
+    # Check if slug already exists
+    existing = await db.companions.find_one({"slug": companion_data.slug})
+    if existing:
+        raise HTTPException(status_code=400, detail="Companion with this slug already exists")
+    
+    companion_dict = companion_data.dict()
+    companion_obj = Companion(**companion_dict)
+    await db.companions.insert_one(companion_obj.dict())
+    return companion_obj
+
+@api_router.put("/companions/{slug}", response_model=Companion)
+async def update_companion(slug: str, companion_data: CompanionUpdate):
+    companion = await db.companions.find_one({"slug": slug})
+    if not companion:
+        raise HTTPException(status_code=404, detail="Companion not found")
+    
+    update_data = {k: v for k, v in companion_data.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.utcnow()
+    
+    await db.companions.update_one({"slug": slug}, {"$set": update_data})
+    updated_companion = await db.companions.find_one({"slug": slug})
+    return Companion(**updated_companion)
+
+@api_router.delete("/companions/{slug}")
+async def delete_companion(slug: str):
+    result = await db.companions.delete_one({"slug": slug})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Companion not found")
+    return {"message": "Companion deleted successfully"}
+
+# Chat endpoint
+@api_router.post("/chat/{companion_slug}", response_model=ChatMessage)
+async def chat_with_companion(companion_slug: str, chat_request: ChatRequest):
+    # Check if companion exists
+    companion = await db.companions.find_one({"slug": companion_slug})
+    if not companion:
+        raise HTTPException(status_code=404, detail="Companion not found")
+    
+    # Simple response based on companion's traits and personality
+    companion_data = Companion(**companion)
+    
+    # Generate a simple response based on the companion's personality
+    responses = {
+        "sophia": f"*Speaking with gentle wisdom* {chat_request.message} - I understand your thoughts. Let me share some poetic insight that might help guide you with clarity and tenderness.",
+        "aurora": f"*With executive composure* {chat_request.message} - I've analyzed your message strategically. Here's my sleek, influential perspective on moving forward.",
+        "vanessa": f"*With magnetic energy* {chat_request.message} - That's interesting! Let me give you my direct, street-smart take on this. I'm built to move people to action."
+    }
+    
+    default_response = f"*As {companion_data.name}* {chat_request.message} - Thank you for sharing that with me. Based on my traits of being {', '.join(companion_data.traits)}, here's my perspective."
+    
+    companion_response = responses.get(companion_slug, default_response)
+    
+    chat_message = ChatMessage(
+        companion_slug=companion_slug,
+        user_message=chat_request.message,
+        companion_response=companion_response
+    )
+    
+    await db.chat_messages.insert_one(chat_message.dict())
+    return chat_message
+
 # Include the router in the main app
 app.include_router(api_router)
 
